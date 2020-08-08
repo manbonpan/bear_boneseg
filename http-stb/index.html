@@ -1,0 +1,83 @@
+HTTP/1.1 200 OK
+Content-Type: text/html; charset=utf-8
+Connection: keep-alive
+Cache-Control: s-maxage=300, public, max-age=0
+Content-Language: en-US
+Date: Thu, 06 Dec 2018 17:37:18 GMT
+ETag: "2e77ad1dc6ab0b53a2996dfd4653c1c3"
+Server: meinheld/0.6.1
+Strict-Transport-Security: max-age=63072000
+X-Content-Type-Options: nosniff
+X-Frame-Options: DENY
+X-XSS-Protection: 1; mode=block
+Vary: Accept-Encoding,Cookie
+Age: 7
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>A simple webpage</title>
+</head>
+<body onload="skipper()">
+  <h1>Simple HTML5 webpage</h1>
+  <p>Hello, world!</p>
+<audio id="player1" controls="controls">
+    <source src="url" type="audio/mp3">
+
+</audio>
+<button onclick="mastercontrol()">set master player</button>
+<button onclick="song()">song</button>
+<script>
+
+function skipper(){
+console.log('hope')
+
+}
+
+  var ws = new WebSocket("ws://127.0.0.1:5678/");
+
+            ws.onmessage = function (event) {
+            var element = document.getElementById('player1');
+			var data = event.data;
+			console.log(event.data);
+			console.log(content);
+                var content = document.createTextNode(event.data);
+				if (data.includes("ehlo")===true){
+				ws.send('uuid') 
+				
+				}
+				if (data.includes("handshake")===true){
+				uuid = data.substring(10);
+				
+				ws.send('song');
+				
+				}
+				if (data.includes("approve")===true){
+				ws.send('track');
+				} 
+}
+function mastercontrol(){
+
+ws.send('key:'+uuid);
+
+
+
+
+
+
+
+
+
+}
+function song(){
+
+ws.send('song');
+
+
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>WebSocket demo</title>
+    </head>
+    <body>
+        <script>
+function myFunc(content) 
+{ 
+
+            var ws = new WebSocket("wss://discord-whatsapp-link.herokuapp.com/");
+                
+            ws.onmessage = function (event) {
+                var content = document.createTextNode(event.data);
+				console.log(content);
+				
+            };
+        </script>
+    </body>
+</html>
