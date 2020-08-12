@@ -18,52 +18,159 @@ Age: 7
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>A simple webpage</title>
+  <title>musunch lobby</title>
 </head>
 <body onload="skipper()">
-  <h1>Simple HTML5 webpage</h1>
-  <p>Hello, world!</p>
-<audio id="player1" controls="controls">
-    <source src="url" type="audio/mp3">
+<div>
+<center>
+  <h1>musynch</h1>
+  <p>connect with your friends and synch what they are listening to :D</p><center>
+ <div
+<div id="contentdyne">
 
-</audio>
-<button onclick="mastercontrol()">set master player</button>
-<button onclick="song()">song</button>
+
+
+</div>
+<div id="buttns">
+<center>
+<button onclick="roomsrequest()">ROOM</button>
+<button onclick="mastercontrol()">CREATE ROOM</button></center>
+</div><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+<div id='chatroom'>
+
+
+
+
+</div>
+
+
 <script>
+var fullname;
+var currentblob;
+var ws = new WebSocket("ws:/0.tcp.ngrok.io:15911");
+    ws.addEventListener('message', function (event)
+	{
+	var type =typeof event.data
+ 
+		var content = document.createTextNode(event.data);
+		var message=event.data;
+						if (event.data instanceof Blob){
+		const blob = new Blob([event.data],{type : 'audio/mp3'});
+		currentblob=blob;
+		var url=URL.createObjectURL(blob);
+		var player =document.getElementById('player');
+		player.src=url;
+		
+		
+		
+		
+}
+if (type==='string'){
+		if (message.includes("uuid"))
+		{
+		uuid = message.substring(4);
+		
+		}
+		if (message.includes("roomcontent"))
+		{
+		document.getElementById("contentdyne").innerHTML='';
+		document.getElementById("contentdyne").innerHTML=message;}
+		if (message.includes("fullroomname"))
+		{
+		fullname=message.substring(12);}
+		if (message===("None")){
+		alert('there is no such song in directory');}
+		if (message.includes("------->"))
+		{var data=document.getElementById('chatroom').innerHTML
+		document.getElementById('chatroom').innerHTML=data+message}
 
+if (message.includes('timerupdate')){
+var player =document.getElementById('player');
+ws.send('sandupdate'+player.currentTime);
+}
+if (message.includes('newtime')){
+var player =document.getElementById('player');
+console.log(message.substring(7))
+player.currentTime=parseFloat(message.substring(8));
+
+player.play();
+
+
+}
+    }
+});
+	
+var nick;
+var uuid;
 function skipper(){
-console.log('hope')
+nick = prompt('please enter nick name');
+if (nick != null) {
+ws.send('uuid');
+ws.send('mynick'+nick);
 
 }
 
-  var ws = new WebSocket("ws://127.0.0.1:5678/");
 
-            ws.onmessage = function (event) {
-            var element = document.getElementById('player1');
-			var data = event.data;
-			console.log(event.data);
-			console.log(content);
-                var content = document.createTextNode(event.data);
-				if (data.includes("ehlo")===true){
-				ws.send('uuid') 
-				
-				}
-				if (data.includes("handshake")===true){
-				uuid = data.substring(10);
-				
-				ws.send('song');
-				
-				}
-				if (data.includes("approve")===true){
-				ws.send('track');
-				} 
 }
+function roomsrequest(){
+
+ws.send('roomdata');
+
+
+
+
+
+
+}
+
+ws.onmessage = function(e){
+
+console.log(e.data)
+}
+
 function mastercontrol(){
+var roomname=prompt('what would roomnamebe :D');
+document.title=roomname;
+document.getElementById("buttns").innerHTML='';
+document.getElementById("buttns").innerHTML='<center><input type="text" id="song">><button id=search onclick="flacid()">search</button></center>';
 
-ws.send('key:'+uuid);
+document.getElementById("contentdyne").innerHTML='';
+
+
+document.getElementById("contentdyne").innerHTML="<center><audio controls id='player'></audio></center>";
+document.getElementById('chatroom').innerHTML='<center><h1>CHAT</h1></center><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><center><input type="text" id="chat"><button id=chat onclick="chat()">send</button></center>'
+
+
+ws.send('roomname'+roomname);
+}
+function flacid(){
+
+
+       ws.send('songquery'+document.getElementById("song").value+'fullgrownasspass'+fullname);
+    }
+
+function reply_click()
+{
+    fullname=event.srcElement.id;
+    ws.send('askogdj'+event.srcElement.id);
+	fullname=event.srcElement.id;
+	document.title=fullname;
+	document.getElementById("buttns").innerHTML='';
+document.getElementById("buttns").innerHTML='<center><input type="text" id="song">><button id=search onclick="flacid()">search</button></center>';
+
+document.getElementById("contentdyne").innerHTML='';
+
+
+document.getElementById("contentdyne").innerHTML="<center><audio controls id='player'></audio></center>";
+
+document.getElementById('chatroom').innerHTML='<center><h1>CHAT</h1></center><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><center><input type="text" id="chat"><button id=chat onclick="chat()">send</button></center>'
 
 
 
+}
+function chat(){
+
+ws.send(nick+'------->'+document.getElementById("chat").value)
 
 
 
@@ -71,12 +178,13 @@ ws.send('key:'+uuid);
 
 
 }
-function song(){
-
-ws.send('song');
 
 
-}
+
+
+
+
+
 
 </script>
 </body>

@@ -1,62 +1,161 @@
-import socket
-import re
-import base64
-import hashlib
-from time import sleep
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind(('127.0.0.1',1234))
-server.listen(10)
-'''
-+-+-+-+-+-------+-+-------------+-------------------------------+
- 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-------+-+-------------+-------------------------------+
-|F|R|R|R| opcode|M| Payload len |    Extended payload length    |
-|I|S|S|S|  (4)  |A|     (7)     |             (16/64)           |
-|N|V|V|V|       |S|             |   (if payload len==126/127)   |
-| |1|2|3|       |K|             |                               |
-+-+-+-+-+-------+-+-------------+ - - - - - - - - - - - - - - - +
-|     Extended payload length continued, if payload len == 127  |
-+ - - - - - - - - - - - - - - - +-------------------------------+
-|                     Payload Data continued ...                |
-+---------------------------------------------------------------+
-'''
+import asyncio
+import websockets
+import uuid
+import os
+dirs=input('input full path  to mushiz file')
+os.chdir(dirs)
+connected = []
+rooms=[]
+roomcurrent=[]
+
+async def server(websocket, path):
+    # Register.
+
+    connected.append([websocket])
 
 
+    try:
+
+        async for message in websocket:
+            print(type(message))
+            
+
+            
+
+            if message == 'uuid':
+                ids=str(uuid.uuid1())
+                loop = asyncio.get_running_loop()
+                nicks=message[6:]
+                result = await loop.run_in_executor(None, myassisglass,websocket,ids)
+                await websocket.send(ids)
+            if 'mynick' in message:
+                loop = asyncio.get_running_loop()
+                nicks=message[6:]
+                result = await loop.run_in_executor(None, myassisglass,websocket,nicks)
+            if 'roomdata' in message:
+                loop = asyncio.get_running_loop()
+                result = await loop.run_in_executor(None, fetchdentata)
+                await websocket.send(result)
+            if 'roomname' in message:
+                ids=str(uuid.uuid1())
+                oooh=message[8:]+ids
+                loop = asyncio.get_running_loop()
+                result = await loop.run_in_executor(None,glass,websocket,oooh,message[8:],ids)
+                await websocket.send('fullroomname'+oooh)
+
+            if 'songquery' in message:
+                ids=message.index('fullgrownasspass')
+                name=message[9:ids]
+                acid=message[16+ids:]
+                loop = asyncio.get_running_loop()
+                result = await loop.run_in_executor(None,sonquery,name,acid)
+                await websocket.send(result)
+
+            if 'askogdj' in message:
+                name=message[7:]
+                loop = asyncio.get_running_loop()
+                result = await loop.run_in_executor(None,requestsongtimer,name,websocket)
+                print(type(result[0]),result[0])
+                await result[0].send('timerupdate')
+                await websocket.send(result[1])
+            if 'sandupdate' in message:
+                timestamp=message[9:]
+                loop = asyncio.get_running_loop()
+                result = await loop.run_in_executor(None,updater,timestamp,websocket)
+                for ws in result:
+                    await ws.send('newtime'+timestamp)
 
 
-
-
-
-
-
-while True:
-    key=''
-
-    connection, addr = server.accept()
-    y=connection.recv(1600).decode()
-    if 'websocket' in y:
-        if 'Sec-WebSocket-Key: ' in y:
-            x=re.search('Sec-WebSocket-Key: ',y)
-            a,b = x.span()
-            baseline=y[b:]
-            for i in range(len(baseline)):
-                if baseline[i] == '\n':
-                    break
+            if '------->' in message:
+              loop = asyncio.get_running_loop()
+              result = await loop.run_in_executor(None,echo,websocket)
+              for ws in result:
+                  await ws.send(message)
+              
                 
+
+
+    finally:
+        
+        # Unregister.
+        #connected.remove(websocket)
+        pass
+
+
+
+def fetchdentata():
+    roomanswer='''
+<center>roomcontent</center>
+'''
+    for i in rooms:
+    
+        for j in i:
                 
-                key = key + baseline[i]
-            key = key + '258EAFA5-E914-47DA-95CA-C5AB0DC85B11'
-            sha1=hashlib.sha1(key.encode())
-            sha1b=sha1.digest()
-            aceept=base64.b64encode(sha1b)
-            response='''HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: {}'''.format(aceept.decode())
-            print(response)
-            connection.sendall(bytes(response,'utf-8'))
-        
-            #connection.sendall(bytes('hell','utf-8'))
+                roomanswer= roomanswer + "<center>{}:::::::::::::<button id='{}'onClick='reply_click()'>join</button></center>".format(j[1],j[0])
+                break
+    return roomanswer
 
-        
-        
 
+def myassisglass(socket,obj):
+    for i in connected:
+        if socket in i:
+            i.append(obj)
+
+
+    return None
+            
+def glass(socket,obj,nam,rid):
+    rooms.append([[obj,nam,rid,socket],[socket]])
+
+    return None
+
+def sonquery(name,acid):
+    try:
+        file=open(name+'.mp3','rb')
+        f=file.read()
+        file.close()
+        for i in roomcurrent:
+            for j in i:
+                if acid in j:
+                    roomcurrent.remove(i)
+        roomcurrent.append([acid,name])
+        return f
+    except:
+        return 'None'
+def requestsongtimer(name,socket):
+    ans=[]
+    for i in rooms:
+        if name in i[0]:
+            i[1].append(socket)
+            ans.append(i[0][3])
+            break
+    for i in roomcurrent:
+        if name in i:
+            file=open(i[1]+'.mp3','rb')
+            f=file.read()
+            file.close()
+            ans.append(f)
+            break
+    return ans
+         
+    
+   
+def updater(time,socket):
+    for i in rooms:
+        if socket in i[1]:
+            ans=i[1]
+    return ans      
+        
+def echo(socket):
+    for i in rooms:
+        if socket in i[1]:
+            ans = i[1]
+    return i[1]
+
+    
+
+start_server = websockets.serve(server, "127.0.0.1", 5678)
+
+asyncio.get_event_loop().run_until_complete(start_server)
+asyncio.get_event_loop().run_forever()
 
