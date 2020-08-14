@@ -14,7 +14,7 @@ preprocess=(index.read())
 index.close()
 origins=[]
 substring = ['src="','rel="','href']
-#forbidden=['s','r','c','r','e','l','u','r','l','(',')','h','r','e','f','"']
+#useless part i just wanted to see what parsing html wud feel like ik i go off tangents alot well im not bright :(
 with open('./index.html') as fp:
    for cnt, line in enumerate(fp):
        count=0
@@ -38,8 +38,7 @@ with open('./index.html') as fp:
                        stri=stri+line[b+j]
                        count=count+1
                    
-                   
-                   
+############################################################################################################################################################################
                
     
                
