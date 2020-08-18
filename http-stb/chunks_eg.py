@@ -26,12 +26,12 @@ async def server(websocket, path):
                 ids=str(uuid.uuid1())
                 loop = asyncio.get_running_loop()
                 nicks=message[6:]
-                result = await loop.run_in_executor(None, myassisglass,websocket,ids)
+                result = await loop.run_in_executor(None, groot,websocket,ids)
                 await websocket.send(ids)
             if 'mynick' in message:
                 loop = asyncio.get_running_loop()
                 nicks=message[6:]
-                result = await loop.run_in_executor(None, myassisglass,websocket,nicks)
+                result = await loop.run_in_executor(None, groot,websocket,nicks)
             if 'roomdata' in message:
                 loop = asyncio.get_running_loop()
                 result = await loop.run_in_executor(None, fetchdentata)
@@ -44,7 +44,7 @@ async def server(websocket, path):
                 await websocket.send('fullroomname'+oooh)
 
             if 'songquery' in message:
-                ids=message.index('fullgrownasspass')
+                ids=message.index('passage')
                 name=message[9:ids]
                 acid=message[16+ids:]
                 loop = asyncio.get_running_loop()
@@ -96,7 +96,7 @@ def fetchdentata():
     return roomanswer
 
 
-def myassisglass(socket,obj):
+def groot(socket,obj):
     for i in connected:
         if socket in i:
             i.append(obj)
